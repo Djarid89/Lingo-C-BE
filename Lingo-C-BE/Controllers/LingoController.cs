@@ -12,15 +12,16 @@ namespace Lingo_C_BE.Controllers
   [Route("lingo/")]
   public class LingoController : ControllerBase
   {
-    private static readonly ImmutableHashSet<string> Words = ImmutableHashSet.Create<string>(new string[] {
-      "Statua", "Culo", "Orgoglio", "Ceppa", "Suca", "Rolly", "Gamba", "Anno", "Buono", "Cattivo"
-    });
-
     [HttpGet("getword")]
     public GetWordResult GetWord()
     {
       GetWordResult result = new GetWordResult();
-      result.Word = Words.ElementAt<string>(new Random().Next(Words.Count - 1));
+      using(StreamReader sr = System.IO.File.OpenText(@".\assets\words.txt"))
+      {
+        string file = sr.ReadToEnd();
+        string[] words = Array.ConvertAll(file.Split(','), word => word.ToString());
+        result.Word = words.ElementAt<string>(new Random().Next(words.Length - 1));
+      }
 
       return result;
     }
