@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Immutable;
 
 namespace Lingo_C_BE.Controllers
 {
@@ -8,19 +7,41 @@ namespace Lingo_C_BE.Controllers
     public string Word { get; set; } = string.Empty;
   }
 
+  public class CheckWordResult
+  {
+    public bool Valid { get; set; }
+  }
+
   [ApiController]
   [Route("lingo/")]
   public class LingoController : ControllerBase
   {
-    [HttpGet("getword")]
-    public GetWordResult GetWord()
+    [HttpGet("getword/{size}")]
+    public GetWordResult GetWord(int? size = null)
     {
       GetWordResult result = new GetWordResult();
+      using(StreamReader sr = System.IO.File.OpenText(@".\assets\lingoWords.txt"))
+      {
+        List<string> words = new List<string>(sr.ReadToEnd().Split(','));
+        if(size != null)
+        {
+          words = words.Where(word => word.Length == size).ToList();
+        }
+        result.Word = words.ElementAt(new Random().Next(words.Count - 1));
+      }
+      
+
+      return result;
+    }
+
+    [HttpGet("checkword/{word}")]
+    public CheckWordResult CheckWord(string word)
+    {
+      CheckWordResult result = new CheckWordResult();
       using(StreamReader sr = System.IO.File.OpenText(@".\assets\words.txt"))
       {
-        string file = sr.ReadToEnd();
-        string[] words = Array.ConvertAll(file.Split(','), word => word.ToString());
-        result.Word = words.ElementAt<string>(new Random().Next(words.Length - 1));
+        List<string> words = new List<string>(sr.ReadToEnd().Split(','));
+        result.Valid = words.Exists(w => w.ToUpper().Equals(word.ToUpper()));
       }
 
       return result;
