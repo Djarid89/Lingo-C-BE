@@ -5,6 +5,7 @@ namespace Lingo_C_BE.Controllers
   public class GetWordResult
   {
     public string Word { get; set; } = string.Empty;
+    public string Error { get; set; } = null;
   }
 
   public class CheckWordResult
@@ -37,7 +38,13 @@ namespace Lingo_C_BE.Controllers
         {
           words = words.Where(word => word.Length == size).ToList();
         }
-        result.Word = words.ElementAt(new Random().Next(words.Count - 1));
+        if(words.Count == 0)
+        {
+          result.Error = "Non ci sono parole di questa lunghezza";
+        } else
+        {
+          result.Word = words.ElementAt(new Random().Next(words.Count - 1));
+        }
       }
         
       return result;
