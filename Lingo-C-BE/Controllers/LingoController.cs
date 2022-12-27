@@ -1,4 +1,7 @@
+using Lingo_C_BE.Utils;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
+using System.Text;
 
 namespace Lingo_C_BE.Controllers
 {
@@ -20,6 +23,7 @@ namespace Lingo_C_BE.Controllers
 
   public class UpdateWordsResult
   {
+    public List<string> wordsAdded { get; set; } = new List<string>();
     public bool Valid { get; set; }
   }
 
@@ -57,7 +61,7 @@ namespace Lingo_C_BE.Controllers
       using(StreamReader sr = System.IO.File.OpenText(@".\assets\words.txt"))
       {
         List<string> words = new List<string>(sr.ReadToEnd().Split(','));
-        result.Valid = words.Exists(w => w.ToUpper().Equals(word.ToUpper()));
+        result.Valid = words.Exists(w => w.RemoveAccents().ToUpper().Equals(word.RemoveAccents().ToUpper()));
       }
 
       return result;
@@ -80,8 +84,9 @@ namespace Lingo_C_BE.Controllers
       {
         data.Words.ForEach(word =>
         {
-          if(!words.Exists(w => w.ToUpper().Equals(word.ToUpper())) && CheckWord(word).Valid)
+          if(!words.Exists(w => w.RemoveAccents().ToUpper().Equals(word.RemoveAccents().ToUpper())) && CheckWord(word).Valid)
           {
+            result.wordsAdded.Add(word);
             sw.Write(',' + word);
           }
         });
